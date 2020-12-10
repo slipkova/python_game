@@ -16,6 +16,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 class Player(pygame.sprite.Sprite):
+    score = 0
     def __init__(self):
         super(Player, self).__init__()
         self.surf = pygame.image.load("images/jet.png").convert()
@@ -75,28 +76,54 @@ class Cloud(pygame.sprite.Sprite):
 
 
     def update(self):
-        self.rect.move_ip(-5, 0)
+        self.rect.move_ip(-3, 0)
         if self.rect.right < 0:
             self.kill()
 
-pygame.mixer.init()
 
+class Cake(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Cake, self).__init__()
+        self.surf = pygame.transform.scale(pygame.image.load("images/cake.png").convert(), [30, 25])
+        self.surf.set_colorkey((0, 0, 0), RLEACCEL)
+        self.rect = self.surf.get_rect(
+            center=(
+                randint(SCREEN_WIDTH +20, SCREEN_WIDTH + 100),
+                randint(0, SCREEN_HEIGHT)
+            )
+        )
+
+
+    def update(self):
+        self.rect.move_ip(-4, 0)
+        if self.rect.right < 0:
+            self.kill()
+        elif pygame.sprite.collide_rect(player, self):
+            self.kill()
+            player.score += 1
+
+
+pygame.mixer.init()
+pygame.font.init()
 pygame.init()
 
 clock = pygame.time.Clock()
+font = pygame.font.SysFont('', 50)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 ADDENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDENEMY, 300)
 ADDCLOUD = pygame.USEREVENT + 2
-pygame.time.set_timer(ADDCLOUD, 1000)
-
+pygame.time.set_timer(ADDCLOUD, 1200)
+ADDCAKE = pygame.USEREVENT +3
+pygame.time.set_timer(ADDCAKE, 1700)
 
 player = Player()
 
 enemies = pygame.sprite.Group()
 clouds = pygame.sprite.Group()
+cakes = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
@@ -129,12 +156,17 @@ while running:
             new_cloud = Cloud()
             clouds.add(new_cloud)
             all_sprites.add(new_cloud)
+        elif event.type == ADDCAKE:
+            new_cake = Cake()
+            cakes.add(new_cake)
+            all_sprites.add(new_cake)
 
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
 
     enemies.update()
     clouds.update()
+    cakes.update()
 
     screen.fill((135, 206, 250))
 
@@ -152,9 +184,10 @@ while running:
         pygame.time.delay(500)
         running = False
 
+    screen.blit(font.render(f"SCORE: {player.score}", False, (0, 0, 0)), [SCREEN_WIDTH - 200, 5])
     pygame.display.flip()
 
-    clock.tick(40)
+    clock.tick(35)
 
 pygame.mixer.quit()
 pygame.quit()
