@@ -104,10 +104,11 @@ class Cake(pygame.sprite.Sprite):
 
 
 pygame.mixer.init()
-
+pygame.font.init()
 pygame.init()
 
 clock = pygame.time.Clock()
+font = pygame.font.SysFont('', 50)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -183,8 +184,7 @@ while running:
         pygame.time.delay(500)
         running = False
 
-
-
+    screen.blit(font.render(f"SCORE: {player.score}", False, (0, 0, 0)), [SCREEN_WIDTH - 200, 5])
     pygame.display.flip()
 
     clock.tick(35)
